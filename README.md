@@ -95,6 +95,53 @@ Los procedimientos almacenados permiten generar reportes dinámicos de movimient
 
 ---
 
+### 🧩 Ejemplo de Procedimiento: `SearchGastosMesActual(...)`
+
+```sql
+DELIMITER ;;
+CREATE PROCEDURE `SearchGastosMesActual`(
+IN p_iduser INT )
+BEGIN
+
+-- OBJETIVO: Buscar 'Cuanto Ha Gastado Durante el Mes Actual' el Usuario
+
+-- DECLARAR VARIABLE: v_fkmonto --> Obtener el Id del Monto a traves del Id del Usuario
+DECLARE v_fkmonto INT;
+
+-- Query para obtener el Id_Monto
+SELECT id_monto INTO v_fkmonto 
+FROM monto 
+WHERE fk_user = p_iduser;
+
+-- Query para Obtener la Acumulacion de los gastos del Mes Actual
+
+SELECT SUM(g.cantidad) AS Total_Gastos 
+FROM gastos AS g
+-- Crear una Tabla Virtual que abarque todas las fechas y sus respectivos gastos
+-- Su objetivo es que Cada fecha contenida en formato JSON se convierta en un Registro de la tabla temporal Virtual
+JOIN JSON_TABLE( 
+-- g.fechas --> Es la Columna que posee datos tipo JSON
+g.fechas, 
+-- '$[*]' --> Recorrer todos los datos que esten contenidos en la Array
+-- COLUMNS(nombre_de_la_columna tipo_de_dato PATH '$.key_seleccionada')
+-- En este caso PATH '$' es así, debido a que solo posee fechas, no tiene keys como un ObjectJson, es un array simple. 
+'$[*]' COLUMNS(fecha DATE PATH '$' )
+-- Nombrar la tabla Virtual como fechas_json 
+) AS fechas_json
+-- Condicional que, elige los gastos del monto correspondiente, el monto del usuario
+WHERE g.fk_monto = v_fkmonto 
+-- Condicionar los gastos seleccionados en base a: Deben ser gastos del mes Actual Y no pueden ser gastos de fechas mayores al dia de hoy.
+AND DATE_FORMAT(fechas_json.fecha, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+AND fechas_json.fecha <= CURDATE()
+-- Agrupar todos los gastos en base a sus Montos Correspondientes
+GROUP BY g.fk_monto;
+
+END ;;
+DELIMITER ;
+```
+
+---
+
 ## 🧰 Restauración de la Base de Datos
 
 Puedes restaurar toda la estructura y datos iniciales ejecutando el archivo incluido:
