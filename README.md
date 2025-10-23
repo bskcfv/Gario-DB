@@ -102,7 +102,7 @@ Puedes restaurar toda la estructura y datos iniciales ejecutando el archivo incl
 ### 📍 Ruta del archivo
 
 ```
-/DB/BackUp/gario_completov6.sql
+/DB/BackUp/gario_backup.sql
 ```
 
 ### 💻 Comando de restauración
@@ -110,7 +110,7 @@ Puedes restaurar toda la estructura y datos iniciales ejecutando el archivo incl
 Ejecuta en tu terminal (asegúrate de tener MySQL instalado y configurado):
 
 ```bash
-mysql -u tu_usuario -p < DB/BackUp/gario_completov6.sql
+mysql -u tu_usuario -p < DB/BackUp/gario_backup.sql
 ```
 
 > 💡 Este script crea todas las **tablas, relaciones, triggers y procedimientos** necesarios para el correcto funcionamiento del sistema GARIO.
